@@ -1,0 +1,58 @@
+# # Default ignored files
+# /shelf/
+# /workspace.xml
+# # Environment-dependent path to Maven home directory
+# /mavenHomeManager.xml
+
+# ================== GENERAL ==================
+.env
+.env.*
+*.log
+.DS_Store
+
+# ================== JAVA (Spring Boot) ==================
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.log
+
+# Maven
+.mvn/
+!mvnw
+!mvnw.cmd
+
+# IntelliJ / IDE
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# ================== NODE (React Frontend) ==================
+node_modules/
+dist/
+build/
+
+# Vite
+.vite/
+
+# ================== PYTHON (AI MODEL) ==================
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pkl
+*.joblib
+*.h5
+*.pt
+
+# Virtual environments
+venv/
+.env/
+
+# ================== OS FILES ==================
+Thumbs.db
+
+# ================== OPTIONAL ==================
+apache-maven-3.9.14/
