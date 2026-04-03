@@ -364,6 +364,182 @@
 //   )
 // }
 
+// import { useEffect, useMemo, useState } from 'react'
+// import {
+//   getAlerts,
+//   getAnalytics,
+//   getDashboard,
+//   getHeatmap,
+// } from '../services/api'
+// import useSocket from '../hooks/useSocket'
+// import MetricCards from '../components/MetricCards'
+// import HeatmapPanel from '../components/HeatmapPanel'
+// import CrowdAnalyticsChart from '../components/CrowdAnalyticsChart'
+// import ZoneStatsSection from '../components/ZoneStatsSection'
+// import RecentAlertsTable from '../components/RecentAlertsTable'
+// import RightPanel from '../components/RightPanel'
+
+// type Zone = {
+//   zoneName: string
+//   crowdCount: number
+//   density: 'Low' | 'Medium' | 'High' | string
+//   riskScore: number
+// }
+
+// export default function DashboardPage() {
+//   const [dashboard, setDashboard] = useState<any>(null)
+//   const [alerts, setAlerts] = useState<any>(null)
+//   const [analytics, setAnalytics] = useState<any>(null)
+//   const [heatmapPoints, setHeatmapPoints] = useState<
+//     Array<{ lat: number; lng: number; intensity: number }>
+//   >([])
+
+//   useEffect(() => {
+//     let cancelled = false
+
+//     async function load() {
+//       const [d, a, an, h] = await Promise.all([
+//         getDashboard(),
+//         getAlerts(),
+//         getAnalytics(),
+//         getHeatmap(),
+//       ])
+
+//       if (cancelled) return
+
+//       console.log('dashboard:', d.data)
+//       console.log('alerts:', a.data)
+//       console.log('analytics:', an.data)
+//       console.log('heatmap:', h.data)
+
+//       setDashboard(d.data)
+//       setAlerts(a.data)
+//       setAnalytics(an.data)
+
+//       const points = h.data?.points || h.data?.heatmap || h.data || []
+//       setHeatmapPoints(Array.isArray(points) ? points : [])
+//     }
+
+//     load().catch((err) => {
+//       console.error('Load error:', err)
+//     })
+
+//     return () => {
+//       cancelled = true
+//     }
+//   }, [])
+
+//   useSocket({
+//     onCrowd: (payload: unknown) => {
+//       setDashboard(payload)
+//     },
+//     onAlerts: (payload: unknown) => {
+//       setAlerts(payload)
+//     },
+//     onHeatmap: (payload: unknown) => {
+//       const p = payload as any
+//       const points = p?.points || p?.heatmap || p || []
+//       setHeatmapPoints(Array.isArray(points) ? points : [])
+//     },
+//   })
+
+//   const metrics = useMemo(() => {
+//     const totalCrowd = dashboard?.totalCrowd ?? 0
+//     const activeAlerts = alerts?.activeAlerts?.length ?? 0
+//     const networkScore = dashboard?.networkScore ?? 0
+//     const peakCrowd = analytics?.peakCrowd ?? dashboard?.peakCrowd ?? 0
+
+//     return {
+//       totalCrowd,
+//       activeAlerts,
+//       networkScore,
+//       peakCrowd,
+//     }
+//   }, [dashboard, alerts, analytics])
+
+//   const transformedZones = useMemo<Zone[]>(() => {
+//     return (dashboard?.zones || []).map((z: any) => ({
+//       zoneName: z.zoneName,
+//       crowdCount: z.crowdCount,
+//       density: z.density,
+//       riskScore: z.riskScore,
+//     }))
+//   }, [dashboard])
+
+//   const hourlyTrend = useMemo(() => {
+//     const trend = analytics?.hourlyTrend || analytics?.hourlyData || []
+//     return (Array.isArray(trend) ? trend : []).map((p: any) => ({
+//       label:
+//         p.label ??
+//         p.hourLabel ??
+//         p.hour ??
+//         (typeof p.time === 'string' ? p.time : ''),
+//       value: Number(p.value ?? p.count ?? p.traffic ?? 0),
+//     }))
+//   }, [analytics])
+
+//   const recentAlerts = useMemo(() => {
+//     const list =
+//       alerts?.recentAlerts ||
+//       alerts?.alertHistory ||
+//       alerts?.activeAlerts ||
+//       []
+//     return (Array.isArray(list) ? list : []).slice(0, 10)
+//   }, [alerts])
+
+//   const sensorStatus = useMemo(() => {
+//     return (
+//       dashboard?.sensorStatus || {
+//         status: 'Unknown',
+//         activeSensors: 0,
+//         uptimeSeconds: 0,
+//         entryRate: 0,
+//         exitRate: 0,
+//       }
+//     )
+//   }, [dashboard])
+
+//   const activity = useMemo(() => {
+//     return (recentAlerts || []).slice(0, 6).map((a: any) => ({
+//       text: `${a.zone || 'Zone'}: ${a.message || ''}`,
+//       at: typeof a.timestamp === 'number' ? a.timestamp : Date.parse(a.timestamp),
+//     }))
+//   }, [recentAlerts])
+
+//   const finalHeatmapPoints = useMemo(() => {
+//     return heatmapPoints
+//   }, [heatmapPoints])
+
+//   return (
+//     <div className="flex flex-col gap-6">
+//       <MetricCards metrics={metrics} />
+
+//       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
+//         <div className="xl:col-span-2">
+//           <HeatmapPanel points={finalHeatmapPoints} />
+//         </div>
+
+//         <div className="hidden xl:block xl:col-span-1">
+//           <RightPanel sensorStatus={sensorStatus} activity={activity} />
+//         </div>
+//       </div>
+
+//       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
+//         <div className="xl:col-span-2">
+//           <CrowdAnalyticsChart hourlyTrend={hourlyTrend} />
+//         </div>
+
+//         <div className="xl:col-span-1">
+//           <ZoneStatsSection zones={transformedZones} />
+//         </div>
+//       </div>
+
+//       <div className="w-full">
+//         <RecentAlertsTable alerts={recentAlerts} />
+//       </div>
+//     </div>
+//   )
+// }
 import { useEffect, useMemo, useState } from 'react'
 import {
   getAlerts,
@@ -506,17 +682,13 @@ export default function DashboardPage() {
     }))
   }, [recentAlerts])
 
-  const finalHeatmapPoints = useMemo(() => {
-    return heatmapPoints
-  }, [heatmapPoints])
-
   return (
     <div className="flex flex-col gap-6">
       <MetricCards metrics={metrics} />
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
         <div className="xl:col-span-2">
-          <HeatmapPanel points={finalHeatmapPoints} />
+          <HeatmapPanel points={heatmapPoints} />
         </div>
 
         <div className="hidden xl:block xl:col-span-1">
